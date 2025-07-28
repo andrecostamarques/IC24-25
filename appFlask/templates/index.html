@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor ESP32</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Monitor ESP32 - Sensores BLE</h1>
+        
+        <div id="status" class="status">Desconectado</div>
+        <div id="data-notification" class="data-notification hidden">📊 Dados de leitura recebidos!</div>
+        
+        <!-- Informações do intervalo -->
+        <div class="interval-info">
+            <div class="interval-current" id="current-interval">Intervalo atual: Aguardando dados...</div>
+            <div style="font-size: 14px; color: #666;">
+                <span id="interval-range">Faixa detectada: 250ms - 4000ms</span>
+            </div>
+            <div class="interval-zones">
+                <strong>Últimas mudanças de zona:</strong>
+                <div id="zones-list">Aguardando detecção...</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="scanDevices()">Buscar Dispositivos</button>
+            <button onclick="connectESP32()">Conectar ESP32</button>
+            <button onclick="disconnectESP32()">Desconectar</button>
+            <button onclick="downloadCSV()">Download CSV</button>
+            <button onclick="clearData()">Limpar Gráfico</button>
+        </div>
+        
+        <div id="devices-section" class="hidden">
+            <h3>Dispositivos Encontrados:</h3>
+            <div id="device-list" class="device-list"></div>
+        </div>
+        
+        <div class="container" style="margin-top: 30px; padding: 10px;">
+            <h3>📊 Gráfico em Tempo Real - Sensores + Controle de Velocidade</h3>
+            <div id="sensor-chart" style="width: 100%; height: 500px;"></div>
+            
+            <div class="legend-container">
+                <h4>Legenda de Cores (Sensor Alvo)</h4>
+                <div class="legend-item"><span class="color-box" style="background-color: rgba(255, 107, 107, 0.4);"></span> Fundo Vermelho: Sensor 1 (sLed=0)</div>
+                <div class="legend-item"><span class="color-box" style="background-color: rgba(78, 205, 196, 0.4);"></span> Fundo Verde: Sensor 2 (sLed=1)</div>
+                <div class="legend-item"><span class="color-box" style="background-color: rgba(69, 183, 209, 0.4);"></span> Fundo Azul: Sensor 3 (sLed=2)</div>
+                <div class="legend-item"><span class="color-box" style="background-color: rgba(150, 206, 180, 0.4);"></span> Fundo Verde-Água: Sensor 4 (sLed=3)</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
