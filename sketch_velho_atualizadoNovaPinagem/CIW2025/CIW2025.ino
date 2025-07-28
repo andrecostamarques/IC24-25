@@ -19,8 +19,10 @@ const int sLed[] = {26, 27};
 const int botaoRecord = 23;
 const int sendButton = 18;
 const int led_status = 13;
+const int potenciometro = 4;  // NOVO: GPIO do potenciômetro
 
 bool deviceConnected = false;
+bool oldDeviceConnected = false;
 bool ledState = false;
 unsigned long ultimoBlink = 0;
 const unsigned long intervaloBlink = 500;
@@ -30,7 +32,11 @@ int val_sensor[4];
 uint32_t timestamp = 0;
 uint8_t intLed = 0;
 unsigned long ultimaTroca = 0;
-const unsigned long intervaloTroca = 1000;
+
+// MODIFICADO: intervalo agora é variável controlado pelo potenciômetro
+unsigned long intervaloTroca = 1000;  // Valor inicial padrão
+const unsigned long minIntervalo = 250;   // 0.25s em ms
+const unsigned long maxIntervalo = 4000;  // 4.0s em ms
 
 BLEServer *pServer = nullptr;
 BLECharacteristic *pCharacteristic = nullptr;
@@ -48,6 +54,22 @@ void atualizarLEDs(uint8_t estado) {
 void lerSensores() {
   for (int i = 0; i < 4; i++) {
     val_sensor[i] = analogRead(sensores[i]);
+  }
+}
+
+// NOVA FUNÇÃO: Leitura e mapeamento do potenciômetro
+void atualizarIntervaloTroca() {
+  int valorPot = analogRead(potenciometro);  // Lê valor 0-4095 (12-bit ADC)
+  
+  // Mapeia o valor do potenciômetro (0-4095) para o intervalo (250-4000ms)
+  intervaloTroca = map(valorPot, 0, 4095, minIntervalo, maxIntervalo);
+  
+  // Debug: imprime valores ocasionalmente para monitoramento
+  static unsigned long ultimoDebug = 0;
+  if (millis() - ultimoDebug >= 2000) {  // A cada 2 segundos
+    Serial.printf("Potenciômetro: %d | Intervalo: %lu ms (%.2f s)\n", 
+                  valorPot, intervaloTroca, intervaloTroca / 1000.0);
+    ultimoDebug = millis();
   }
 }
 
@@ -107,8 +129,13 @@ void setup() {
   pinMode(botaoRecord, INPUT);
   pinMode(sendButton, INPUT);
   pinMode(led_status, OUTPUT);
+  pinMode(potenciometro, INPUT);  // NOVO: Configura pino do potenciômetro
 
   atualizarLEDs(1);
+
+  // NOVO: Leitura inicial do potenciômetro
+  atualizarIntervaloTroca();
+  Serial.printf("Intervalo inicial de troca: %lu ms\n", intervaloTroca);
 
   BLEDevice::init("ESP32-SENSOR-SERVER");
   pServer = BLEDevice::createServer();
@@ -130,7 +157,24 @@ void setup() {
 void loop() {
   unsigned long agora = millis();
 
-  // Piscar LED de status se desconectado, caso contrário LED fixo acesso
+  // NOVO: Atualiza intervalo baseado no potenciômetro
+  atualizarIntervaloTroca();
+
+  // Reinicia advertising quando desconecta
+  if (!deviceConnected && oldDeviceConnected) {
+    delay(500); // Pequeno delay antes de reiniciar
+    pServer->startAdvertising();
+    Serial.println("Reiniciando advertising BLE...");
+    oldDeviceConnected = deviceConnected;
+  }
+  
+  // Atualiza estado da conexão
+  if (deviceConnected && !oldDeviceConnected) {
+    oldDeviceConnected = deviceConnected;
+    Serial.println("Cliente conectado!");
+  }
+
+  // Piscar LED de status se desconectado, caso contrário LED fixo aceso
   if (deviceConnected) {
     digitalWrite(led_status, HIGH);
   } else {
@@ -141,7 +185,7 @@ void loop() {
     }
   }
 
-  // Alternar LEDs indicadores
+  // MODIFICADO: Alternar LEDs com intervalo dinâmico baseado no potenciômetro
   if (agora - ultimaTroca >= intervaloTroca) {
     intLed = random(0, 4);
     atualizarLEDs(intLed);
