@@ -84,7 +84,7 @@ function initChart() {
     
     const layout = {
         title: { 
-            text: 'Monitoramento com Controle Dinâmico de Velocidade', 
+            text: 'Monitoramento do Impacto (kg)', 
             font: {size: 18, color: '#333'} 
         },
         xaxis: { 
@@ -93,7 +93,7 @@ function initChart() {
             showgrid: true 
         },
         yaxis: { 
-            title: 'Valor do Sensor', 
+            title: 'Valor do Sensor (0kg - 20kg)', 
             gridcolor: '#E8E8E8', 
             showgrid: true 
         },
@@ -127,17 +127,18 @@ function updateChart() {
                 const chartData = data.data;
                 
                 const timestamps = chartData.map(d => d.timestamp);
-                const sensor1Data = chartData.map(d => d.sensors[0]);
-                const sensor2Data = chartData.map(d => d.sensors[1]);
-                const sensor3Data = chartData.map(d => d.sensors[2]);
-                const sensor4Data = chartData.map(d => d.sensors[3]);
+                const sensor1Data = chartData.map(d => (d.sensors[0] / 4095 * 20).toFixed(2));
+                const sensor2Data = chartData.map(d => (d.sensors[1] / 4095 * 20).toFixed(2));
+                const sensor3Data = chartData.map(d => (d.sensors[2] / 4095 * 20).toFixed(2));
+                const sensor4Data = chartData.map(d => (d.sensors[3] / 4095 * 20).toFixed(2));
+
                 
                 const shapes = [];
                 const ledColors = {
                     0: 'rgba(255, 107, 107, 0.4)',
-                    1: 'rgba(78, 205, 196, 0.4)',
-                    2: 'rgba(69, 183, 209, 0.4)',
-                    3: 'rgba(150, 206, 180, 0.4)'
+                    1: 'rgba(119, 138, 230, 0.4)',
+                    2: 'rgba(248, 248, 30, 0.4)',
+                    3: 'rgba(104, 246, 91, 0.4)'
                 };
                 
                 for (let i = 0; i < chartData.length - 1; i++) {
