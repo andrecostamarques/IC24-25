@@ -220,16 +220,6 @@ void setup() {
 
   // Leitura inicial do potenciômetro
   atualizarIntervaloTroca();
-  Serial.printf("Intervalo inicial de troca: %lu ms\n", intervaloTroca);
-  Serial.println("=== CONFIGURAÇÃO ATUAL DO SISTEMA ===");
-  Serial.println("SENSORES: 4 sensores ativos (pinos 34, 35, 36, 39)");
-  Serial.println("  > EXPANSÃO DISPONÍVEL: Pinos 33 e 32 preparados no circuito");
-  Serial.println("GH CONTROL: 2 bits ativos (valores 0-3)");
-  Serial.println("  Pin 27: Sempre LOW (bit fixo)");
-  Serial.println("  Pin 26: Bit 1 do controle GH");
-  Serial.println("  Pin 25: Bit 0 do controle GH");
-  Serial.println("  > EXPANSÃO DISPONÍVEL: Pin 27 pode ser ativado para 3 bits (0-7)");
-  Serial.println("==========================================");
 
   // Configuração BLE
   BLEDevice::init("ESP32-SENSOR-SERVER");
